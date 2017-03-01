@@ -23,9 +23,12 @@
  *  Boston, MA  02110-1301, USA.
  ****************************************************************/
 
-
+#include <stddef.h>
 #include <QString>
 #include <QObject>
+#include <QDebug>
+#include <QMap>
+#include <QMimeDatabase>
 
 namespace smuse {
 class Sizer : public QObject
@@ -34,13 +37,34 @@ class Sizer : public QObject
 public:
   explicit Sizer(QObject *parent = 0);
 
+  void setAllocSize (const size_t size) { m_allocSize = size; }
+  size_t allocSize () { return m_allocSize; }
+
+  void setListFile (const QString & file) { m_fileListFile = file; }
+  QString listFile() { return m_fileListFile; }
+
+  void reportSpace();
 signals:
 
 public slots:
 
 private:
 
-  QString   m_fileListFile;
+  class MimeType {
+  public:
+    MimeType();
+    MimeType(QString n);
+    QString name;
+    size_t  totalSize;
+    size_t  numFiles;
+    double  avgSize;
+  };
+
+  QString       m_fileListFile;
+  size_t        m_allocSize;
+  QMap<QString, MimeType>   m_mimeRecs;
+  QMimeDatabase m_mimes;
+
 };
 
 } // namespace
