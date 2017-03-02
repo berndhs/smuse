@@ -100,19 +100,21 @@ void
 Sizer::report(QTextStream &output)
 {
   output << "-------------------Report-----------------------" << endl;
-  output << "report on === " << m_fileListFile << " === #: "<<m_totalFiles << endl;
+  output << "report on === " << m_fileListFile << " ===  "<<m_totalFiles << " files" << endl;
   for (auto m=m_mimeRecs.begin(); m!= m_mimeRecs.end(); ++m) {
-    output << "type " << m->name << " total size " << m->totalSize <<
+    output << "\ntype \"" << m->name << "\" total size " << m->totalSize <<
                  " avg Size " << m->avgSize << " number " << m->numFiles<< endl;
+    output << "fragmentation internal: " << double(m->totalFrag)/double(m->totalSize) * 100.0
+           << " %" << endl;
     double sz = double(m->totalSize);
-    output << sz << " bytes \n"
-               << double(sz)/1024.0 << " KiB"
-               << double(sz)/(1024.0*1024.0) << " MiB"
+    output <<"\t" << sz << " size bytes "
+               << double(sz)/1024.0 << " KiB "
+               << double(sz)/(1024.0*1024.0) << " MiB "
                << double(sz)/(1024.0*1024.0*1024.0) << " GiB"<< endl;
     sz = double(m->totalFrag);
-    output << sz << " bytes \n"
-               << double(sz)/1024.0 << " KiB"
-               << double(sz)/(1024.0*1024.0) << " MiB"
+    output <<"\t" << sz << " frag bytes "
+               << double(sz)/1024.0 << " KiB "
+               << double(sz)/(1024.0*1024.0) << " MiB "
                << double(sz)/(1024.0*1024.0*1024.0) << " GiB"<< endl;
 
   }
