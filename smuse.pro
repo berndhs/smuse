@@ -10,10 +10,13 @@ OBJECTS_DIR = tmp/obj
 
 HEADERS += \
     src/sizer.h \
-    src/cmdoptions.h
+    src/cmdoptions.h \
+    src/messagehandler.h \
+    src/gpl2.h
 
 SOURCES += \
     src/sizer.cpp \
     src/main.cpp \
-    src/cmdoptions.cpp
+    src/cmdoptions.cpp \
+    src/messagehandler.cpp
 

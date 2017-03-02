@@ -4,7 +4,7 @@
 /****************************************************************
  * This file is distributed under the following license:
  *
- * Copyright (C) 2011, Bernd Stramm
+ * Copyright (C) 2017, Bernd Stramm
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -26,24 +26,17 @@
 #include <QFileInfo>
 #include <QMimeType>
 #include <QMimeDatabase>
+#include <QTextStream>
+#include <stdio.h>
 
 namespace smuse {
+
 Sizer::Sizer(QObject *parent) : QObject(parent),
-  m_fileListFile(""),
+  m_fileListFile(QString()),
+  m_output(QString()),
   m_allocSize(4096)
 {
   qDebug() << Q_FUNC_INFO;
-}
-
-void
-reportK (size_t sz)
-{
-  qDebug() << sz << "bytes \n"
-             << double(sz)/1024.0 << "KiB"
-             << double(sz)/(1024.0*1024.0) << "MiB"
-             << double(sz)/(1024.0*1024.0*1024.0) << "GiB";
-
-
 }
 
 void Sizer::reportSpace()
@@ -67,6 +60,7 @@ void Sizer::reportSpace()
       mime.name = mimeName;
       mime.numFiles ++;
       mime.totalSize += thisSize;
+      mime.totalFrag += thisFrag;
       mime.avgSize = mime.totalSize / mime.numFiles;
       m_mimeRecs[mimeName] = mime;
       ++fcount;
@@ -76,31 +70,65 @@ void Sizer::reportSpace()
       qDebug() << " last frag " <<thisFrag << " total " << fragmentTotal;
     }
   }
+
   qDebug() << "total files: " <<fcount
            << "\nsize: ";
-  reportK(tsize);
-  qDebug() << "fragementation:";
-  reportK(fragmentTotal);
-  qDebug () << "mime info\n" ;
-  for (auto m=m_mimeRecs.begin(); m!= m_mimeRecs.end(); ++m) {
-    qDebug () << "type " << m->name << "total size " << m->totalSize <<
-                 "avg Size" << m->avgSize << "number " << m->numFiles;
+  m_totalBytes = tsize;
+  m_totalFrag = fragmentTotal;
+  m_totalFiles = fcount;
+  reportTotals();
+
+}
+
+void
+Sizer::reportTotals()
+{
+  if(m_output.isEmpty()) {
+    QTextStream standard (stdout);
+    report(standard);
+  } else {
+    QFile out(m_output);
+    out.open(QFile::WriteOnly);
+    QTextStream outstream(&out);
+    report (outstream);
+    out.close();
   }
 }
 
-Sizer::MimeType::MimeType()
+
+void
+Sizer::report(QTextStream &output)
 {
-  name = QString();
-  numFiles = 0;
-  totalSize = 0;
-  avgSize = 0.0;
+  output << "-------------------Report-----------------------" << endl;
+  output << "report on === " << m_fileListFile << " === #: "<<m_totalFiles << endl;
+  for (auto m=m_mimeRecs.begin(); m!= m_mimeRecs.end(); ++m) {
+    output << "type " << m->name << " total size " << m->totalSize <<
+                 " avg Size " << m->avgSize << " number " << m->numFiles<< endl;
+    double sz = double(m->totalSize);
+    output << sz << " bytes \n"
+               << double(sz)/1024.0 << " KiB"
+               << double(sz)/(1024.0*1024.0) << " MiB"
+               << double(sz)/(1024.0*1024.0*1024.0) << " GiB"<< endl;
+    sz = double(m->totalFrag);
+    output << sz << " bytes \n"
+               << double(sz)/1024.0 << " KiB"
+               << double(sz)/(1024.0*1024.0) << " MiB"
+               << double(sz)/(1024.0*1024.0*1024.0) << " GiB"<< endl;
+
+  }
+
 }
+
+Sizer::MimeType::MimeType()
+  :MimeType(QString())
+{}
 
 Sizer::MimeType::MimeType(QString n)
 {
   name = n;
   totalSize = 0;
   numFiles = 0;
+  totalFrag = 0;
   avgSize = 0.9;
 }
 
