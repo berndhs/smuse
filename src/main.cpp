@@ -51,6 +51,7 @@ main (int argc, char*argv[])
     opts.Usage();
     exit(1);
   }
+  deliberate::showDebug = false;
   if (opts.SeenOpt("debug") && !opts.SeenOpt("quiet")) {
     deliberate::showDebug = true;
   }
