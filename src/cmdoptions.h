@@ -52,6 +52,8 @@ bool Bad ();
 
 QStringList Arguments ();
 
+void addUsage(const QString & use) { mUsage = use; }
+
 void Usage ();
 
 bool WantHelp ();
@@ -121,6 +123,8 @@ private:
    Option * AddOption  (QString longName, 
                         QString shortname, 
                         QString msg);
+
+   QString   mUsage;
    
    static QString  trHelp;
    static QString  trH;

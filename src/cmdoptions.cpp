@@ -70,6 +70,7 @@ CmdOptions::Usage ()
     cout << tab << opt->theMsg.toStdString()    
          << endl;
   }
+  cout << mUsage.toStdString() << endl;
 }
 
 bool

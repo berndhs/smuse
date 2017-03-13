@@ -3,6 +3,7 @@
 #include <QDebug>
 #include "cmdoptions.h"
 #include <QtGlobal>
+#include <QStringList>
 #include "messagehandler.h"
 
 /****************************************************************
@@ -39,6 +40,9 @@ main (int argc, char*argv[])
   opts.AddSoloOption ("debug","D",QObject::tr("show debug messages"));
   opts.AddSoloOption("quiet","Q",QObject::tr("supress debug messages, be extra quiet"));
   opts.AddStringOption ("logdebug","L",QObject::tr("write Debug log to file"));
+  opts.AddStringOption("file","F",QObject::tr("list of files in this file"));
+
+  opts.addUsage(QObject::tr("[dir] - start with directory dir, otherwise start with current"));
 
   bool versionSeen(false);
   opts.SetSoloOpt("version",versionSeen);
@@ -54,15 +58,34 @@ main (int argc, char*argv[])
   if (opts.SeenOpt("version")) {
     return 1;
   }
-  qDebug() << Q_FUNC_INFO;
+  if (opts.SeenOpt("help")) {
+    opts.Usage();
+    return 2;
+  }
 
   Sizer sizer;
   if (opts.SeenOpt("output")) {
     sizer.setOutput(opts.ValueList("output").takeFirst().toString());
   }
 
-  sizer.setListFile(argv[1]);
-  sizer.reportSpace();
+  if (opts.SeenOpt("file")) {
+    sizer.setListFile(opts.ValueList("file").takeFirst().toString());
+  } else {
+    if (argc >= 1) {
+      QStringList args ;
+      for (int i=1;i<argc;++i) {
+        args << argv[i];
+      }
+      sizer.setStartDir(args);
+    } else {
+      QStringList args ;
+      args << ".";
+      sizer.setStartDir(args);
+    }
+  }
+  qDebug() << Q_FUNC_INFO << "about to start";
+  sizer.start();
+  qDebug() << Q_FUNC_INFO << "back from start";
   qDebug() << "alloc size was " << sizer.allocSize();
 
 //  return app.exec();

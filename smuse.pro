@@ -1,7 +1,7 @@
 
 TEMPLATE = app
 TARGET = sizer
-
+QMAKE_CXX = g++
 CONFIG += c++11
 
 MOC_DIR = tmp/moc
